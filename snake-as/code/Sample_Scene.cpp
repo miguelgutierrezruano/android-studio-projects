@@ -9,7 +9,6 @@
  */
 
 #include "Sample_Scene.hpp"
-#include <basics/Canvas>
 #include <basics/Director>
 #include <basics/Log>
 #include <basics/Scaling>
@@ -19,21 +18,25 @@
 using namespace basics;
 using namespace std;
 
-namespace example
+namespace snake
 {
+    constexpr float Cell::size;
+    constexpr float Cell::half_size;
 
     Sample_Scene::Sample_Scene()
     {
         canvas_width  = 1280;
         canvas_height =  720;
+
+
+
+        aspect_ratio_adjusted = false;
     }
 
     bool Sample_Scene::initialize ()
     {
         state     = LOADING;
         suspended = false;
-        x         = 640;
-        y         = 360;
 
         return true;
     }
@@ -88,16 +91,12 @@ namespace example
 
             if (canvas)
             {
-                canvas->clear        ();
-                canvas->set_color    (1, 1, 1);
-                canvas->draw_point   ({ 360, 360 });
-                //canvas->draw_segment ({   0,   0 }, { 1280, 720 });
-                //canvas->draw_segment ({   0, 720 }, { 1280,   0 });
+                canvas->clear();
 
-                if (texture)
-                {
-                    //canvas->fill_rectangle ({ x, y }, { 100, 100 }, texture.get ());
-                }
+
+                draw_cells(canvas);
+                snake.draw_snake(canvas);
+
             }
         }
     }
@@ -110,20 +109,104 @@ namespace example
 
             if (context)
             {
-                texture = Texture_2D::create (ID(test), context, "test.png");
-
-                if (texture)
+                
+                if (!aspect_ratio_adjusted)
                 {
-                    context->add (texture);
+                    // En este ejemplo la ventana está bloqueada para permanecer horizontal.
+                    // Por tanto, lo normal es que el ancho sea mayor que el alto. El alto de la resolución
+                    // virtual se va a dejar fijo en 720 unidades (tal como se estableció en el constructor)
+                    // y se va a escalar el ancho de la resolución virtual para que el aspect ratio virtual
+                    // coincida con el real de la ventana:
+
+                    float real_aspect_ratio = float( context->get_surface_width () ) / context->get_surface_height ();
+
+                    canvas_width = unsigned( canvas_height * real_aspect_ratio );
+
+                    aspect_ratio_adjusted = true;
 
                     state = RUNNING;
+
+                    create_cells();
                 }
+
+
+
+
             }
         }
     }
 
-    void Sample_Scene::run (float )
+    void Sample_Scene::run (float time)
     {
+        snake.move(time);
+    }
+
+    void Sample_Scene::create_cells()
+    {
+        //Cells start points
+        int offset_x = 0, offset_y = 0;
+        for (int i = 0; i < board_height; ++i)
+        {
+            //Each row
+            //v_cells.push_back(std::vector<Cell>());
+            for (int j = 0; j < board_width; ++j)
+            {
+                //Each column
+                //Cell new_cell;
+                if((j == board_width - 2 || j == board_width - 1) || (i == 0 || i == board_height - 1))
+                {
+                    cells[i][j] = Cell(offset_x, offset_y, OCCUPIED);
+                }
+                else
+                {
+                    cells[i][j] = Cell(offset_x, offset_y, FREE);
+                }
+
+                offset_y += Cell::size;
+            }
+            offset_y = 0;
+
+            offset_x += Cell::size;
+        }
+    }
+
+    void Sample_Scene::draw_cells(Canvas * canvas)
+    {
+        int num_cells = 0;
+
+        for (int i = 0; i < board_height; ++i)
+        {
+            //Each row
+            //condition for correct tiling
+            if(i % 2)
+                num_cells = 0;
+            else
+                num_cells = 1;
+
+            for (int j = 0; j < board_width; ++j) {
+                num_cells++;
+
+                //Each column
+                canvas->fill_rectangle( cells[i][j].position , {cells[i][j].size, cells[i][j].size});
+
+
+                if(cells[i][j].status == OCCUPIED)
+                {
+                    canvas->set_color(0.21f, 0.53f, 0); //55, 136, 5
+                }
+                else
+                {
+                    if(num_cells % 2 == 0)
+                        canvas->set_color(0.6f, 0.95f, 0.3f); //55, 136, 5
+                    else
+                        canvas->set_color(0.53f, 0.86f, 0.24f); //134, 220, 61
+                }
+
+
+
+            }
+
+        }
     }
 
 }

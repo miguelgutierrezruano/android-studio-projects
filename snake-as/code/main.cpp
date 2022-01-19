@@ -20,7 +20,7 @@
 #include "Sample_Scene.hpp"
 
 using namespace basics;
-using namespace example;
+using namespace snake;
 using namespace std;
 
 int main ()

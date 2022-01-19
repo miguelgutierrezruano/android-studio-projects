@@ -8,19 +8,29 @@
  * angel.rodriguez@esne.edu
  */
 
+#include "cell.h"
+#include "snake.h"
 #include <memory>
 #include <basics/Scene>
+#include <basics/Canvas>
 #include <basics/Texture_2D>
+#include <vector>
 
-namespace example
+namespace snake
 {
 
     class Sample_Scene : public basics::Scene
     {
 
-        typedef std::shared_ptr< basics::Texture_2D > Texture_Handle;
+    private:
+        bool     aspect_ratio_adjusted;             ///< false hasta que se ajuste el aspect ratio de la resolución
+        ///< virtual para que concincida con el de la real
+
 
     public:
+
+        static constexpr unsigned board_width = 14;
+        static constexpr unsigned board_height = 17;
 
         enum State
         {
@@ -34,8 +44,10 @@ namespace example
         unsigned       canvas_width;
         unsigned       canvas_height;
 
-        Texture_Handle texture;
-        float          x, y;
+
+        Snake snake;
+        Cell cells[board_width][board_height];
+        //std::vector<std::vector<Cell>> v_cells;
 
     public:
 
@@ -58,6 +70,8 @@ namespace example
 
         void load ();
         void run  (float time);
+        void create_cells();
+        void draw_cells(basics::Canvas*);
 
     };
 
