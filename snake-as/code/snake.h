@@ -4,6 +4,7 @@
 
 #include <basics/Vector>
 #include <basics/Canvas>
+#include <iostream>
 
 using namespace basics;
 using namespace std;
@@ -27,40 +28,21 @@ namespace snake
         {
             x = 300;
             y = 300;
-            speed = 500;
-            direction = 0;
+            speed = 300;
+            direction = -1;
             drawPosition = { x - snake_half_size, y - snake_half_size };
         }
-        void draw_snake(Canvas* canvas)
+        void draw_snake(Canvas & canvas)
         {
-            canvas->fill_rectangle(drawPosition, { snake_size, snake_size });
-            //canvas->set_color(0, 0, 1);
+            canvas.set_color(0, 0, 1);
+            canvas.fill_rectangle(drawPosition, { snake_size, snake_size });
+
 
         }
-        void move(float deltaTime)
-        {
-            if(direction == 0)
-            {
-                x += speed * deltaTime;
-            }
-            else if(direction == 1)
-            {
-                x -= speed * deltaTime;
-            }
-            else if(direction == 2)
-            {
-                y += speed * deltaTime;
-            }
-            else if(direction == 3)
-            {
-                y -= speed * deltaTime;
-            }
-            else { }
+        void move(float deltaTime);
 
-            drawPosition = { x - snake_half_size, y - snake_half_size };
 
-        }
-        void change_direction(float );
+        void change_direction(int );
 
     };
 }

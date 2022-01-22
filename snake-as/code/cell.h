@@ -31,14 +31,14 @@ namespace snake
 
 
     public:
-        /*Cell()
+        Cell()
         {
 
             position = { 0, 0 };
             status = FREE;
             mid_point = { position.coordinates.x() + half_size, position.coordinates.y() + half_size };
-        }*/
-        Cell() { };
+        }
+        //Cell() { };
 
         Cell(float _x, float _y, CellStatus _status)
         {
