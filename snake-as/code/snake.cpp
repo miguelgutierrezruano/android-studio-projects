@@ -8,6 +8,8 @@ using namespace basics;
 
 namespace snake
 {
+
+
     void Snake::move(float deltaTime)
     {
 
@@ -33,9 +35,46 @@ namespace snake
 
     }
 
+    void Snake::calculate_current_cell(Cell board[board_swidth][board_sheight])
+    {
+        for (int i = 0; i < board_swidth; ++i)
+        {
+            //Each row
+
+            for (int j = 0; j < board_sheight; ++j) {
+
+                if(board[i][j].contains( { x, y } ))
+                {
+
+                    current_cell = board[i][j];
+                }
+
+
+            }
+
+        }
+
+        if(current_cell.status == OCCUPIED)
+        {
+            change_direction(-1);
+            //Game over
+        }
+    }
+
     void Snake::change_direction(int _direction)
     {
-        direction = _direction;
+        if(direction == 0 && _direction == 2) { }
+        else if (direction == 1 && _direction == 3) { }
+        else if (direction ==  2 && _direction == 0) { }
+        else if (direction == 3 && _direction == 1) { }
+        else if (_direction == -1) { direction = _direction; }
+        else
+            {
+                direction = _direction;
+                x = current_cell.mid_point.coordinates.x();
+                y = current_cell.mid_point.coordinates.y();
+            }
+
     }
 }
 

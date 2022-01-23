@@ -122,6 +122,7 @@ namespace snake
             case LOADING: load ();     break;
             case RUNNING: run  (time); break;
         }
+
     }
 
     void Sample_Scene::render (basics::Graphics_Context::Accessor & context)
@@ -167,12 +168,19 @@ namespace snake
 
                     aspect_ratio_adjusted = true;
 
-                    state = RUNNING;
-
                     calculate_start_point();
 
                     create_cells();
                     create_controllers();
+
+                    snake = Snake(cells[5][5]);
+                    snake.calculate_current_cell(cells);
+
+                    state = RUNNING;
+
+
+
+
 
                 }
 
@@ -185,7 +193,7 @@ namespace snake
 
     void Sample_Scene::run (float time)
     {
-        std::cout << "run working" << std::endl;
+        snake.calculate_current_cell(cells);
         snake.move(time);
     }
 
@@ -249,7 +257,8 @@ namespace snake
                 //Each column
                 canvas.fill_rectangle( cells[i][j].position , {cells[i][j].size, cells[i][j].size});
 
-
+                //canvas.set_color(1, 0,0);
+                //canvas.fill_rectangle( snake.current_cell.position, {cells[i][j].size, cells[i][j].size} );
 
 
 

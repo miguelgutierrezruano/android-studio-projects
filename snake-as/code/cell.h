@@ -6,6 +6,7 @@
 
 #include <basics/Vector>
 
+
 namespace snake
 {
     enum CellStatus {
@@ -45,6 +46,15 @@ namespace snake
             position = { _x, _y };
             status = _status;
             mid_point = { position.coordinates.x() + half_size, position.coordinates.y() + half_size };
+        }
+
+        bool contains (const basics::Vector2f & point) const
+        {
+            return
+                    point[0] > position[0] &&
+                    point[1] > position[1] &&
+                    point[0] < position[0] + size &&
+                    point[1] < position[1] + size;
         }
     };
 }
