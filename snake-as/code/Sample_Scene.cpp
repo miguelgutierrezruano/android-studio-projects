@@ -20,6 +20,8 @@ using namespace std;
 
 namespace snake
 {
+    constexpr unsigned Cell::board_width;
+    constexpr unsigned Cell::board_height;
     constexpr float Cell::size;
     constexpr float Cell::half_size;
 
@@ -53,7 +55,7 @@ namespace snake
 
     void Sample_Scene::handle (Event & event)
     {
-        if (state == RUNNING)
+        if (state == RUNNING && !suspended)
         {
             switch (event.id)
             {
@@ -72,9 +74,23 @@ namespace snake
                             if(controllers[i]->contains(touch_location))
                             {
                                 touched_controller = controllers[i].get();
-                                touched_controller->color = { 0.65f, 0.38f, 0.08f };
-                                snake.change_direction(i);
-                                //move snake
+                                touched_controller->color = { 0.06f, 0.29f, 0.51f };
+
+                                if(first_touch)
+                                {
+                                    snake.change_direction(i, delay);
+                                    snake.sb.sb_direction = 3;
+                                    first_touch = false;
+                                }
+                                else
+                                {
+                                    if(delay <= 0)
+                                    {
+                                        snake.change_direction(i, delay);
+
+                                    }
+                                }
+
                                 break;
                             }
                         }
@@ -105,7 +121,7 @@ namespace snake
                                         *event[ID(x)].as< var::Float > (),
                                         *event[ID(y)].as< var::Float > ()
                                 };
-                        touched_controller->color = { 1, 0.61f, 0.17f };
+                        touched_controller->color = { 0.26f, 0.6f, 0.97f };
 
                         touched_controller = nullptr;
                     }
@@ -143,6 +159,7 @@ namespace snake
 
                 draw_cells(*canvas);
                 snake.draw_snake(*canvas);
+                food.draw_food(*canvas);
 
                 for (int i = 0; i < controllers.size(); ++i) {
                     controllers[i]->render(*canvas);
@@ -170,17 +187,19 @@ namespace snake
 
                     calculate_start_point();
 
+                    first_touch = true;
+
                     create_cells();
                     create_controllers();
 
-                    snake = Snake(cells[5][5]);
+                    snake = Snake(cells[Cell::board_width/2][Cell::board_height/3]);
+                    snake.sb = Snake::snake_body(cells[Cell::board_width/2][Cell::board_height/3 - 1]);
                     snake.calculate_current_cell(cells);
+                    food = Food(cells[Cell::board_width/2][(Cell::board_height/3) * 2 + 1]);
+
+                    delay = 0.f;
 
                     state = RUNNING;
-
-
-
-
 
                 }
 
@@ -195,21 +214,28 @@ namespace snake
     {
         snake.calculate_current_cell(cells);
         snake.move(time);
+        snake.check_food_collision(food, cells);
+
+        if(delay > 0)
+        {
+            delay -= time;
+        }
+
     }
 
     void Sample_Scene::create_cells()
     {
         //Cells start points
         float offset_x = 0, offset_y = start_point;
-        for (int i = 0; i < board_width; ++i)
+        for (int i = 0; i < Cell::board_width; ++i)
         {
             //Each row (vertical)
             //v_cells.push_back(std::vector<Cell>());
-            for (int j = 0; j < board_height; ++j)
+            for (int j = 0; j < Cell::board_height; ++j)
             {
                 //Each column (vertical)
                 //Cell new_cell;
-                if((j == 0 || j == board_height - 1) || (i == 0 || i == board_width - 1))
+                if((j == 0 || j == Cell::board_height - 1) || (i == 0 || i == Cell::board_width - 1))
                 {
                     cells[i][j] = Cell(offset_x, offset_y, OCCUPIED);
                 }
@@ -230,7 +256,7 @@ namespace snake
     {
         int num_cells = 0;
 
-        for (int i = 0; i < board_width; ++i)
+        for (int i = 0; i < Cell::board_width; ++i)
         {
             //Each row
             //condition for correct tiling
@@ -239,7 +265,7 @@ namespace snake
             else
                 num_cells = 1;
 
-            for (int j = 0; j < board_height; ++j) {
+            for (int j = 0; j < Cell::board_height; ++j) {
                 num_cells++;
 
                 if(cells[i][j].status == OCCUPIED)
@@ -271,10 +297,10 @@ namespace snake
 
     void Sample_Scene::calculate_start_point()
     {
-        start_point = (canvas_height - (board_height * Cell::size)) * 0.5f;
+        start_point = (canvas_height - (Cell::board_height * Cell::size)) * 0.5f;
         last_point = canvas_height - start_point;
 
-        float free_size = canvas_width - board_width * Cell::size;
+        float free_size = canvas_width - Cell::board_width * Cell::size;
         float midpoint_x = canvas_width - (free_size * 0.5f);
         midpoint = { midpoint_x, (last_point + start_point) * 0.5f  };
 
@@ -286,28 +312,28 @@ namespace snake
 
         controllers.emplace_back
         (
-                new Controller({ board_width * Cell::size, start_point + offset },
-                               { board_width * Cell::size, last_point - offset },
+                new Controller({ Cell::board_width * Cell::size, start_point + offset },
+                               { Cell::board_width * Cell::size, last_point - offset },
                                { midpoint.coordinates.x() - offset, midpoint.coordinates.y() },
-                               { 1, 0.61f, 0.17f })
+                               { 0.26f, 0.6f, 0.97f })
                 );
         controllers.emplace_back(
-                new Controller({ board_width * Cell::size + offset, start_point },
+                new Controller({ Cell::board_width * Cell::size + offset, start_point },
                                { canvas_width - offset, start_point },
                                { midpoint.coordinates.x(), midpoint.coordinates.y() - offset },
-                               { 1, 0.61f, 0.17f })
+                               {0.26f, 0.6f, 0.97f})
                 );
         controllers.emplace_back(
                 new Controller({ canvas_width, start_point + offset },
                                { canvas_width, last_point - offset },
                                { midpoint.coordinates.x() + offset, midpoint.coordinates.y() },
-                               { 1, 0.61f, 0.17f })
+                               { 0.26f, 0.6f, 0.97f })
                 );
         controllers.emplace_back(
-                new Controller({ board_width * Cell::size + offset, last_point  },
+                new Controller({ Cell::board_width * Cell::size + offset, last_point  },
                                { canvas_width - offset, last_point },
                                { midpoint.coordinates.x(), midpoint.coordinates.y() + offset },
-                               { 1, 0.61f, 0.17f })
+                               { 0.26f, 0.6f, 0.97f })
                 );
 
 

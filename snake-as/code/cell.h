@@ -20,6 +20,8 @@ namespace snake
 
 
     public:
+        static constexpr unsigned board_width = 17;
+        static constexpr unsigned board_height = 14;
         static constexpr float size = 50;
         static constexpr float half_size = size / 2;
 

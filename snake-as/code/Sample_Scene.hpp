@@ -10,6 +10,7 @@
 
 #include "cell.h"
 #include "snake.h"
+#include "Food.h"
 #include <memory>
 #include <basics/Scene>
 #include <basics/Canvas>
@@ -33,8 +34,8 @@ namespace snake
 
     public:
 
-        static constexpr unsigned board_width = 17;
-        static constexpr unsigned board_height = 14;
+        //static constexpr unsigned board_width = 17;
+        //static constexpr unsigned board_height = 14;
 
         enum State
         {
@@ -97,10 +98,14 @@ namespace snake
 
         };
 
+        Cell cells[Cell::board_width][Cell::board_height];
         Snake snake;
-        Cell cells[board_width][board_height];
+        Food food;
+
 
         //Handle
+        float delay;
+        bool first_touch;
         Vector2f touch_location;
         vector< shared_ptr< Controller > > controllers;
         Controller * touched_controller;
