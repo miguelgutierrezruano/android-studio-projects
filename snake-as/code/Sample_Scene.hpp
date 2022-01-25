@@ -16,6 +16,7 @@
 #include <basics/Canvas>
 #include <basics/Texture_2D>
 #include <vector>
+#include <list>
 
 namespace snake
 {
@@ -99,6 +100,8 @@ namespace snake
         };
 
         Cell cells[Cell::board_width][Cell::board_height];
+        vector<Pivot> pivot_list;
+
         Snake snake;
         Food food;
 

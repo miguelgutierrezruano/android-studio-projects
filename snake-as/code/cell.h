@@ -14,6 +14,19 @@ namespace snake
         OCCUPIED
     };
 
+    struct Pivot
+    {
+        basics::Vector2f position;
+        int turn_direction;
+
+        Pivot() { }
+        Pivot(basics::Vector2f pos, int dir)
+        {
+            position = pos;
+            turn_direction = dir;
+        }
+    };
+
     struct Cell {
 
     private:

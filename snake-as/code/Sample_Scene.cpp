@@ -30,7 +30,13 @@ namespace snake
         canvas_width  = 1280;
         canvas_height =  720;
 
-
+        start_point = 0;
+        last_point = 0;
+        state = LOADING;
+        suspended = false;
+        delay = 0;
+        first_touch = true;
+        touched_controller = nullptr;
 
         aspect_ratio_adjusted = false;
     }
@@ -78,15 +84,25 @@ namespace snake
 
                                 if(first_touch)
                                 {
-                                    snake.change_direction(i, delay);
-                                    snake.sb.sb_direction = 3;
-                                    first_touch = false;
+                                    if(i != 1)
+                                    {
+                                        snake.change_direction(i, delay);
+                                        snake.sb[0].sb_direction = 3;
+                                        pivot_list.emplace_back(
+                                                Pivot(snake.current_cell.mid_point, snake.get_dir())
+                                                );
+                                        first_touch = false;
+                                    }
+
                                 }
                                 else
                                 {
                                     if(delay <= 0)
                                     {
                                         snake.change_direction(i, delay);
+                                        pivot_list.emplace_back(
+                                                Pivot(snake.current_cell.mid_point, snake.get_dir())
+                                        );
 
                                     }
                                 }
@@ -156,10 +172,14 @@ namespace snake
             {
                 canvas->clear();
 
-
                 draw_cells(*canvas);
                 snake.draw_snake(*canvas);
                 food.draw_food(*canvas);
+
+                //for (int i = 0; i < pivot_list.size(); ++i) {
+                //    canvas->set_color(1, 0,0);
+                //    canvas->fill_rectangle(pivot_list[i].position, {5, 5});
+                //}
 
                 for (int i = 0; i < controllers.size(); ++i) {
                     controllers[i]->render(*canvas);
@@ -193,7 +213,9 @@ namespace snake
                     create_controllers();
 
                     snake = Snake(cells[Cell::board_width/2][Cell::board_height/3]);
-                    snake.sb = Snake::snake_body(cells[Cell::board_width/2][Cell::board_height/3 - 1]);
+                    snake.sb.emplace_back(
+                            snake_body(cells[Cell::board_width/2][Cell::board_height/3 - 1])
+                            );
                     snake.calculate_current_cell(cells);
                     food = Food(cells[Cell::board_width/2][(Cell::board_height/3) * 2 + 1]);
 
@@ -213,7 +235,7 @@ namespace snake
     void Sample_Scene::run (float time)
     {
         snake.calculate_current_cell(cells);
-        snake.move(time);
+        snake.move(time, pivot_list);
         snake.check_food_collision(food, cells);
 
         if(delay > 0)
@@ -254,7 +276,7 @@ namespace snake
 
     void Sample_Scene::draw_cells(Canvas & canvas)
     {
-        int num_cells = 0;
+        int num_cells;
 
         for (int i = 0; i < Cell::board_width; ++i)
         {
