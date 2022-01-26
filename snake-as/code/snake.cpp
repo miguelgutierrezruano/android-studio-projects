@@ -81,6 +81,8 @@ namespace snake
 
             for (int j = 0; j < Cell::board_height; ++j) {
 
+                //Solo si es interior status = Free;
+                
                 if(board[i][j].contains( { x, y } ))
                 {
 
