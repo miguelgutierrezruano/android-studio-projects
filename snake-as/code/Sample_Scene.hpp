@@ -107,7 +107,6 @@ namespace snake
 
 
         //Handle
-        float delay;
         bool first_touch;
         Vector2f touch_location;
         vector< shared_ptr< Controller > > controllers;

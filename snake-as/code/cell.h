@@ -11,20 +11,8 @@ namespace snake
 {
     enum CellStatus {
         FREE,
-        OCCUPIED
-    };
-
-    struct Pivot
-    {
-        basics::Vector2f position;
-        int turn_direction;
-
-        Pivot() { }
-        Pivot(basics::Vector2f pos, int dir)
-        {
-            position = pos;
-            turn_direction = dir;
-        }
+        OCCUPIED,
+        BORDER
     };
 
     struct Cell {
@@ -43,6 +31,7 @@ namespace snake
         basics::Vector2f mid_point;
 
         CellStatus status;
+        bool hasPivot;
 
 
 
@@ -70,6 +59,21 @@ namespace snake
                     point[1] > position[1] &&
                     point[0] < position[0] + size &&
                     point[1] < position[1] + size;
+        }
+    };
+
+    struct Pivot
+    {
+        basics::Vector2f position;
+        int turn_direction;
+        Cell pivot_cell;
+
+        Pivot() { }
+        Pivot(basics::Vector2f pos, int dir, Cell & _pivotcell)
+        {
+            position = pos;
+            turn_direction = dir;
+            pivot_cell = _pivotcell;
         }
     };
 }

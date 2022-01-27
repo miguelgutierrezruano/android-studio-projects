@@ -44,27 +44,38 @@ namespace snake
 
             for (int j = 0; j < pivots.size(); ++j)
             {
-                if(helper::distance(pivots[j].position, { sb[i].sb_x, sb[i].sb_y } ) < 7)
+                if(helper::distance(pivots[j].position, { sb[i].sb_x, sb[i].sb_y } ) < 20)
                 {
-                    sb[i].sb_change_direction(pivots[j].turn_direction);
+                    sb[i].isVisible = false;
+                    sb[i].timerVisible.reset();
 
-                    if(sb[i].sb_direction == 1 || sb[i].sb_direction == 3)
+                    if((sb[i].sb_direction == 0 && sb[i].sb_x <= pivots[j].position[0]) ||
+                    (sb[i].sb_direction == 1 && sb[i].sb_y <= pivots[j].position[1]) ||
+                    (sb[i].sb_direction == 2 && sb[i].sb_x >= pivots[j].position[0]) ||
+                    (sb[i].sb_direction == 3 && sb[i].sb_y >= pivots[j].position[1]))
                     {
-                        sb[i].sb_x = pivots[j].position[0];
-                    }
-                    else if(sb[i].sb_direction == 0 || sb[i].sb_direction == 2)
-                    {
-                        sb[i].sb_y = pivots[j].position[1];
+                        sb[i].sb_change_direction(pivots[j].turn_direction);
+
+                        if(sb[i].sb_direction == 1 || sb[i].sb_direction == 3)
+                        {
+                            sb[i].sb_x = pivots[j].pivot_cell.mid_point[0];
+                        }
+                        else if(sb[i].sb_direction == 0 || sb[i].sb_direction == 2)
+                        {
+                            sb[i].sb_y = pivots[j].pivot_cell.mid_point[1];
+                        }
+
+                        //sobrecargar ==
+                        if(sb[i].sb_x == sb.back().sb_x && sb[i].sb_y == sb.back().sb_y
+                           && pivots[j].position == pivots.front().position)
+                        {
+                            //ultimo pivote
+                            pivots.erase(pivots.begin());
+                            pivots.shrink_to_fit();
+                        }
                     }
 
-                    //sobrecargar ==
-                    if(sb[i].sb_x == sb.back().sb_x && sb[i].sb_y == sb.back().sb_y
-                       && pivots[j].position == pivots.front().position)
-                    {
-                        //ultimo pivote
-                        pivots.erase(pivots.begin());
-                        pivots.shrink_to_fit();
-                    }
+
                 }
             }
         }
@@ -81,21 +92,31 @@ namespace snake
 
             for (int j = 0; j < Cell::board_height; ++j) {
 
-                //Solo si es interior status = Free;
-                
-                if(board[i][j].contains( { x, y } ))
-                {
-
-                    current_cell = board[i][j];
-                }
+                if((j == 0 || j == Cell::board_height - 1) || (i == 0 || i == Cell::board_width - 1)) { }
+                else
+                    board[i][j].status = FREE;
 
                 for (int k = 0; k < sb.size(); ++k) {
                     if(board[i][j].contains( { sb[k].sb_x, sb[k].sb_y } ))
                     {
                         sb[k].sb_current_cell = board[i][j];
                         if(k!=0)
-                            sb[k].sb_current_cell.status = OCCUPIED;
+                            board[i][j].status = OCCUPIED;
 
+                    }
+                }
+
+                if(board[i][j].contains( { x, y } ))
+                {
+
+                    current_cell = board[i][j];
+                    //board[i][j].status = OCCUPIED;
+
+
+                    if(current_cell.status == BORDER)
+                    {
+                        game_over();
+                        //Game over
                     }
                 }
 
@@ -103,17 +124,12 @@ namespace snake
 
         }
 
-        if(current_cell.status == OCCUPIED)
-        {
-
-            game_over();
-            //Game over
-        }
-
     }
 
-    void Snake::check_food_collision(Food & food, Cell board[Cell::board_width][Cell::board_height])
+    void Snake::check_food_collision(Food & food, Cell (&board)[Cell::board_width][Cell::board_height])
     {
+        calculate_current_cell(board);
+
         if(helper::distance( { x, y }, food.get_position()) < (snake_half_size + food.food_half_size) - 20)
         {
             food.generate_food(board);
@@ -123,10 +139,24 @@ namespace snake
                     //sb.back().sb_current_cell
             );
         }
+
+
+    }
+
+    void Snake::check_self_collision()
+    {
+        for (int i = 0; i < sb.size(); ++i) {
+            if(i != 0)
+            {
+                if(sb[i].contains( { x, y } ))
+                    game_over();
+            }
+
+        }
     }
 
 
-    void Snake::change_direction(int _direction, float & delay)
+    void Snake::change_direction(int _direction)
     {
         if(direction == 0 && _direction == 2) { }
         else if (direction == 1 && _direction == 3) { }
@@ -141,8 +171,6 @@ namespace snake
                 y = current_cell.mid_point.coordinates.y();
 
 
-                //Bajar delay si se sube la velocidad
-                delay = 0.09f;
             }
 
     }

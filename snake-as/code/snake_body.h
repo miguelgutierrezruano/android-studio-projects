@@ -6,6 +6,7 @@
 #include "helper.h"
 #include <basics/Vector>
 #include <basics/Canvas>
+#include <basics/Timer>
 #include <iostream>
 #include <cmath>
 
@@ -27,6 +28,8 @@ namespace snake
         int sb_direction;
         Cell sb_current_cell;
         Vector2f sb_drawPosition;
+        bool isVisible;
+        Timer timerVisible;
 
         snake_body()
         {
@@ -35,6 +38,7 @@ namespace snake
             sb_speed = 300;
             sb_direction = -1;
             sb_drawPosition = { sb_x - snake_half_size, sb_y - snake_half_size };
+            isVisible = true;
         }
 
         snake_body(Cell sb_starting_cell)
@@ -45,6 +49,7 @@ namespace snake
             sb_direction = -1;
             sb_drawPosition = { sb_x - snake_half_size, sb_y - snake_half_size };
             sb_current_cell = sb_starting_cell;
+            isVisible = true;
         }
 
         snake_body(Cell sb_starting_cell, float starting_direction)
@@ -55,6 +60,7 @@ namespace snake
             sb_direction = starting_direction;
             sb_drawPosition = { sb_x - snake_half_size, sb_y - snake_half_size };
             sb_current_cell = sb_starting_cell;
+            isVisible = true;
         }
 
         snake_body(Vector2f pos, float starting_direction)
@@ -64,6 +70,7 @@ namespace snake
             sb_speed = 0;
             sb_direction = starting_direction;
             sb_drawPosition = { sb_x - snake_half_size, sb_y - snake_half_size };
+            isVisible = true;
         }
 
         void draw_snake_body(Canvas & canvas)
@@ -106,6 +113,11 @@ namespace snake
             }
 
             sb_drawPosition = { sb_x - snake_half_size, sb_y - snake_half_size };
+
+            if(timerVisible.get_elapsed_seconds() > 0.03)
+                isVisible = true;
+            else
+                isVisible = false;
         }
 
         void sb_change_direction(int _direction)
@@ -113,7 +125,14 @@ namespace snake
             sb_direction = _direction;
         }
 
-
+        bool contains (const basics::Vector2f & point) const
+        {
+            return
+                    point[0] > sb_drawPosition[0] &&
+                    point[1] > sb_drawPosition[1] &&
+                    point[0] < sb_drawPosition[0] + snake_size &&
+                    point[1] < sb_drawPosition[1] + snake_size;
+        }
 
 
 

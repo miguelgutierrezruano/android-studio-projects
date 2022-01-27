@@ -56,12 +56,12 @@ namespace snake
 
 
 
-        void generate_food(Cell board[Cell::board_width][Cell::board_height])
+        void generate_food(Cell (&board)[Cell::board_width][Cell::board_height])
         {
             x = rand() % (Cell::board_width - 2) + 1;
             y = rand() % (Cell::board_height - 2) + 1; //random(1, Cell::board_height - 1)
 
-            while (board[x][y].status == OCCUPIED)
+            while (board[x][y].status == OCCUPIED || board[x][y].status == BORDER)
             {
                 if (++x == Cell::board_width)
                 {

@@ -74,7 +74,8 @@ namespace snake
             if(!sb.empty())
             {
                 for (int i = 0; i < sb.size(); ++i) {
-                    sb[i].draw_snake_body(canvas);
+                    if(sb[i].isVisible)
+                        sb[i].draw_snake_body(canvas);
                 }
             }
 
@@ -83,11 +84,14 @@ namespace snake
         void move(float deltaTime, vector<Pivot> & pivots);
 
         void calculate_current_cell(Cell (&board)[Cell::board_width][Cell::board_height]);
-        void check_food_collision(Food & food, Cell board[Cell::board_width][Cell::board_height]);
+        void check_food_collision(Food & food, Cell (&board)[Cell::board_width][Cell::board_height]);
+        void check_self_collision();
 
-        void change_direction(int , float &);
+        void change_direction(int);
 
         int get_dir() { return direction; }
+        float get_x() { return x; }
+        float get_y() { return y; }
 
         void game_over()
         {

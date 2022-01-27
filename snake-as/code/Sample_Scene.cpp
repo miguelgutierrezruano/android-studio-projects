@@ -34,7 +34,6 @@ namespace snake
         last_point = 0;
         state = LOADING;
         suspended = false;
-        delay = 0;
         first_touch = true;
         touched_controller = nullptr;
 
@@ -86,25 +85,66 @@ namespace snake
                                 {
                                     if(i != 1)
                                     {
-                                        snake.change_direction(i, delay);
-                                        snake.sb[0].sb_direction = 3;
-                                        pivot_list.emplace_back(
-                                                Pivot(snake.current_cell.mid_point, snake.get_dir())
+                                        if(i == 0 && snake.get_dir() == 2) { }
+                                        else if (i ==  2 && snake.get_dir() == 0) { }
+                                        else if (i == 3 && snake.get_dir() == 1) { }
+                                        else if (i == snake.get_dir()) { }
+                                        else
+                                        {
+                                            bool canSpawn = true;
+                                            if(!pivot_list.empty())
+                                            {
+                                                for (int j = 0; j < pivot_list.size(); ++j) {
+                                                    if(snake.current_cell.contains(pivot_list[i].position))
+                                                        canSpawn = false;
+                                                }
+
+                                            }
+
+                                            if(canSpawn)
+                                            {
+                                                pivot_list.emplace_back(
+                                                        Pivot({ snake.get_x(), snake.get_y() }, i, snake.current_cell)
                                                 );
-                                        first_touch = false;
+                                                snake.change_direction(i);
+                                                snake.sb[0].sb_direction = 3;
+                                                first_touch = false;
+                                            }
+
+                                        }
+
+
                                     }
 
                                 }
                                 else
                                 {
-                                    if(delay <= 0)
+                                    if(i == 0 && snake.get_dir() == 2) { }
+                                    else if (i == 1 && snake.get_dir() == 3) { }
+                                    else if (i ==  2 && snake.get_dir() == 0) { }
+                                    else if (i == 3 && snake.get_dir() == 1) { }
+                                    else if (i == snake.get_dir()) { }
+                                    else
                                     {
-                                        snake.change_direction(i, delay);
-                                        pivot_list.emplace_back(
-                                                Pivot(snake.current_cell.mid_point, snake.get_dir())
-                                        );
+                                        bool canSpawn = true;
+                                        if(!pivot_list.empty())
+                                        {
+                                            for (int j = 0; j < pivot_list.size(); ++j) {
+                                                if(snake.current_cell.contains(pivot_list[i].position))
+                                                    canSpawn = false;
+                                            }
 
+                                        }
+
+                                        if(canSpawn)
+                                        {
+                                            pivot_list.emplace_back(
+                                                    Pivot({ snake.get_x(), snake.get_y() }, i, snake.current_cell)
+                                            );
+                                            snake.change_direction(i);
+                                        }
                                     }
+
                                 }
 
                                 break;
@@ -176,10 +216,10 @@ namespace snake
                 snake.draw_snake(*canvas);
                 food.draw_food(*canvas);
 
-                //for (int i = 0; i < pivot_list.size(); ++i) {
-                //    canvas->set_color(1, 0,0);
-                //    canvas->fill_rectangle(pivot_list[i].position, {5, 5});
-                //}
+                for (int i = 0; i < pivot_list.size(); ++i) {
+                    canvas->set_color(0.26f, 0.6f, 0.97f);
+                    canvas->fill_rectangle(pivot_list[i].pivot_cell.position, {Cell::size, Cell::size});
+                }
 
                 for (int i = 0; i < controllers.size(); ++i) {
                     controllers[i]->render(*canvas);
@@ -219,7 +259,6 @@ namespace snake
                     snake.calculate_current_cell(cells);
                     food = Food(cells[Cell::board_width/2][(Cell::board_height/3) * 2 + 1]);
 
-                    delay = 0.f;
 
                     state = RUNNING;
 
@@ -234,14 +273,10 @@ namespace snake
 
     void Sample_Scene::run (float time)
     {
-        snake.calculate_current_cell(cells);
+        //snake.calculate_current_cell(cells);
         snake.move(time, pivot_list);
         snake.check_food_collision(food, cells);
-
-        if(delay > 0)
-        {
-            delay -= time;
-        }
+        snake.check_self_collision();
 
     }
 
@@ -259,7 +294,7 @@ namespace snake
                 //Cell new_cell;
                 if((j == 0 || j == Cell::board_height - 1) || (i == 0 || i == Cell::board_width - 1))
                 {
-                    cells[i][j] = Cell(offset_x, offset_y, OCCUPIED);
+                    cells[i][j] = Cell(offset_x, offset_y, BORDER);
                 }
                 else
                 {
@@ -290,7 +325,7 @@ namespace snake
             for (int j = 0; j < Cell::board_height; ++j) {
                 num_cells++;
 
-                if(cells[i][j].status == OCCUPIED)
+                if(cells[i][j].status == BORDER)
                 {
                     canvas.set_color(0.21f, 0.53f, 0); //55, 136, 5
                 }
