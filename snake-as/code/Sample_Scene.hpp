@@ -140,6 +140,8 @@ namespace snake
         void create_controllers();
         void calculate_start_point();
 
+        void restart_game();
+
     };
 
 }

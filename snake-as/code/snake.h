@@ -31,7 +31,6 @@ namespace snake
         float x, y;
         float speed;
         int direction;
-        int lenght;
 
         //vector<snake_body> v_snake_body;
 
@@ -45,7 +44,6 @@ namespace snake
             y = 300;
             speed = 300;
             direction = -1;
-            lenght = 1;
             drawPosition = { x - snake_half_size, y - snake_half_size };
 
         }
@@ -56,7 +54,6 @@ namespace snake
             y = startingCell.mid_point.coordinates.y();
             speed = 300;
             direction = -1;
-            lenght = 1;
             //v_snake_body.emplace_back();
             drawPosition = { x - snake_half_size, y - snake_half_size };
             current_cell = startingCell;
@@ -83,9 +80,9 @@ namespace snake
         }
         void move(float deltaTime, vector<Pivot> & pivots);
 
-        void calculate_current_cell(Cell (&board)[Cell::board_width][Cell::board_height]);
-        void check_food_collision(Food & food, Cell (&board)[Cell::board_width][Cell::board_height]);
-        void check_self_collision();
+        bool calculate_current_cell(Cell (&board)[Cell::board_width][Cell::board_height]);
+        bool check_food_collision(Food & food, Cell (&board)[Cell::board_width][Cell::board_height]);
+        bool check_self_collision();
 
         void change_direction(int);
 

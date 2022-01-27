@@ -84,7 +84,7 @@ namespace snake
 
     }
 
-    void Snake::calculate_current_cell(Cell (&board)[Cell::board_width][Cell::board_height])
+    bool Snake::calculate_current_cell(Cell (&board)[Cell::board_width][Cell::board_height])
     {
         for (int i = 0; i < Cell::board_width; ++i)
         {
@@ -116,6 +116,7 @@ namespace snake
                     if(current_cell.status == BORDER)
                     {
                         game_over();
+                        return true;
                         //Game over
                     }
                 }
@@ -123,12 +124,15 @@ namespace snake
             }
 
         }
-
+        return false;
     }
 
-    void Snake::check_food_collision(Food & food, Cell (&board)[Cell::board_width][Cell::board_height])
+    bool Snake::check_food_collision(Food & food, Cell (&board)[Cell::board_width][Cell::board_height])
     {
-        calculate_current_cell(board);
+        if(calculate_current_cell(board))
+            return true;
+
+
 
         if(helper::distance( { x, y }, food.get_position()) < (snake_half_size + food.food_half_size) - 20)
         {
@@ -140,19 +144,24 @@ namespace snake
             );
         }
 
-
+        return false;
     }
 
-    void Snake::check_self_collision()
+    bool Snake::check_self_collision()
     {
         for (int i = 0; i < sb.size(); ++i) {
             if(i != 0)
             {
                 if(sb[i].contains( { x, y } ))
+                {
                     game_over();
+                    return true;
+                }
+
             }
 
         }
+        return false;
     }
 
 

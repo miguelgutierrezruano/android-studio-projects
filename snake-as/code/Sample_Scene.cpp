@@ -256,7 +256,7 @@ namespace snake
                     snake.sb.emplace_back(
                             snake_body(cells[Cell::board_width/2][Cell::board_height/3 - 1])
                             );
-                    snake.calculate_current_cell(cells);
+                    //snake.calculate_current_cell(cells);
                     food = Food(cells[Cell::board_width/2][(Cell::board_height/3) * 2 + 1]);
 
 
@@ -275,8 +275,13 @@ namespace snake
     {
         //snake.calculate_current_cell(cells);
         snake.move(time, pivot_list);
-        snake.check_food_collision(food, cells);
-        snake.check_self_collision();
+
+        if(snake.check_food_collision(food, cells))
+            restart_game();
+
+        if(snake.check_self_collision())
+            restart_game();
+
 
     }
 
@@ -394,6 +399,21 @@ namespace snake
                 );
 
 
+    }
+
+    void Sample_Scene::restart_game()
+    {
+        snake.sb.clear();
+        pivot_list.clear();
+
+        first_touch = true;
+
+        snake = Snake(cells[Cell::board_width/2][Cell::board_height/3]);
+        snake.sb.emplace_back(
+                snake_body(cells[Cell::board_width/2][Cell::board_height/3 - 1])
+        );
+        snake.calculate_current_cell(cells);
+        food = Food(cells[Cell::board_width/2][(Cell::board_height/3) * 2 + 1]);
     }
 
 }
