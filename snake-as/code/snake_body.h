@@ -35,7 +35,7 @@ namespace snake
         {
             sb_x = 300;
             sb_y = 300;
-            sb_speed = 300;
+            sb_speed = 350;
             sb_direction = -1;
             sb_drawPosition = { sb_x - snake_half_size, sb_y - snake_half_size };
             isVisible = true;
@@ -45,7 +45,7 @@ namespace snake
         {
             sb_x = sb_starting_cell.mid_point.coordinates.x();
             sb_y = sb_starting_cell.mid_point.coordinates.y();
-            sb_speed = 300;
+            sb_speed = 350;
             sb_direction = -1;
             sb_drawPosition = { sb_x - snake_half_size, sb_y - snake_half_size };
             sb_current_cell = sb_starting_cell;
@@ -82,17 +82,18 @@ namespace snake
         void sb_move(float deltaTime, Vector2f followed_position, int node_direction)
         {
             //check distance for speed interval
+
             if(node_direction == sb_direction &&
-               helper::distance( {sb_x, sb_y}, followed_position) < snake_size + 5)
+               helper::distance( {sb_x, sb_y}, followed_position) < snake_size - 5)
             {
-                sb_speed = 50;
+                sb_speed = 200;
             }
             else if(node_direction == sb_direction &&
-                     helper::distance( {sb_x, sb_y}, followed_position) > snake_size + 10)
+                     helper::distance( {sb_x, sb_y}, followed_position) > snake_size)
             {
-                sb_speed = 350;
+                sb_speed = 400;
             }
-            else { sb_speed = 300; }
+            else { sb_speed = 350; }
 
 
             if(sb_direction == 0)
@@ -114,7 +115,7 @@ namespace snake
 
             sb_drawPosition = { sb_x - snake_half_size, sb_y - snake_half_size };
 
-            if(timerVisible.get_elapsed_seconds() > 0.03)
+            if(timerVisible.get_elapsed_seconds() > 0.01)
                 isVisible = true;
             else
                 isVisible = false;

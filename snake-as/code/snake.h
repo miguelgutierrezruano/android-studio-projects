@@ -24,7 +24,6 @@ namespace snake
         static constexpr float snake_half_size = snake_size / 2;
 
 
-
         Cell current_cell;
         vector<snake_body> sb;
     private:
@@ -42,7 +41,7 @@ namespace snake
         {
             x = 300;
             y = 300;
-            speed = 300;
+            speed = 350;
             direction = -1;
             drawPosition = { x - snake_half_size, y - snake_half_size };
 
@@ -52,7 +51,7 @@ namespace snake
         {
             x = startingCell.mid_point.coordinates.x();
             y = startingCell.mid_point.coordinates.y();
-            speed = 300;
+            speed = 350;
             direction = -1;
             //v_snake_body.emplace_back();
             drawPosition = { x - snake_half_size, y - snake_half_size };
@@ -68,6 +67,8 @@ namespace snake
             canvas.fill_rectangle(drawPosition, { snake_size, snake_size });
             //draw body
 
+
+
             if(!sb.empty())
             {
                 for (int i = 0; i < sb.size(); ++i) {
@@ -80,9 +81,9 @@ namespace snake
         }
         void move(float deltaTime, vector<Pivot> & pivots);
 
-        bool calculate_current_cell(Cell (&board)[Cell::board_width][Cell::board_height]);
-        bool check_food_collision(Food & food, Cell (&board)[Cell::board_width][Cell::board_height]);
-        bool check_self_collision();
+        void calculate_current_cell(Cell (&board)[Cell::board_width][Cell::board_height]);
+        void check_food_collision(Food & food, Cell (&board)[Cell::board_width][Cell::board_height]);
+        bool check_endgame_collision();
 
         void change_direction(int);
 

@@ -1,6 +1,7 @@
 //
 // Created by migue on 25/01/2022.
 //
+#pragma once
 
 using namespace basics;
 namespace snake

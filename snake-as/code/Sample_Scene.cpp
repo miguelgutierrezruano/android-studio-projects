@@ -273,13 +273,12 @@ namespace snake
 
     void Sample_Scene::run (float time)
     {
-        //snake.calculate_current_cell(cells);
+        snake.calculate_current_cell(cells);
         snake.move(time, pivot_list);
 
-        if(snake.check_food_collision(food, cells))
-            restart_game();
+        snake.check_food_collision(food, cells);
 
-        if(snake.check_self_collision())
+        if(snake.check_endgame_collision())
             restart_game();
 
 

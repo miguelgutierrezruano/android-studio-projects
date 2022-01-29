@@ -28,7 +28,7 @@ namespace snake
         Cell food_cell;
 
     private:
-        int x, y;
+        //int x, y;
         Vector2f drawPosition;
         Vector2f position;
 
@@ -37,9 +37,7 @@ namespace snake
 
         Food(Cell startingCell)
         {
-            x = startingCell.mid_point.coordinates.x();
-            y = startingCell.mid_point.coordinates.y();
-            position = { x, y };
+            position = { startingCell.mid_point.coordinates.x(), startingCell.mid_point.coordinates.y() };
             drawPosition = { position[0] - food_half_size, position[1] - food_half_size };
             food_cell = startingCell;
         }
@@ -58,10 +56,10 @@ namespace snake
 
         void generate_food(Cell (&board)[Cell::board_width][Cell::board_height])
         {
-            x = rand() % (Cell::board_width - 2) + 1;
-            y = rand() % (Cell::board_height - 2) + 1; //random(1, Cell::board_height - 1)
+            int x = rand() % (Cell::board_width - 2) + 1;
+            int y = rand() % (Cell::board_height - 2) + 1; //random(1, Cell::board_height - 1)
 
-            while (board[x][y].status == OCCUPIED || board[x][y].status == BORDER)
+            while (board[x][y].status != FREE)
             {
                 if (++x == Cell::board_width)
                 {
