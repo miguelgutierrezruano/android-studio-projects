@@ -1,6 +1,9 @@
-//
-// Created by migue on 25/01/2022.
-//
+/*
+ * SNAKE_BODY
+ * Copyright © 2022+ Miguel Gutiérrez Ruano
+ *
+ * miguelgutierrezruano@gmail.com
+ */
 
 #include "cell.h"
 #include "helper.h"
@@ -15,6 +18,10 @@ using namespace std;
 
 namespace snake
 {
+    /**
+         * Cada objeto de este tipo es un componente más del cuerpo de la serpiente
+         */
+
     class snake_body
     {
     public:
@@ -41,6 +48,10 @@ namespace snake
             isVisible = true;
         }
 
+        /**
+         * Constructor para iniciar el primer elemento del cuerpo
+         * @param sb_starting_cell la celda en la que empieza
+         */
         snake_body(Cell sb_starting_cell)
         {
             sb_x = sb_starting_cell.mid_point.coordinates.x();
@@ -52,17 +63,11 @@ namespace snake
             isVisible = true;
         }
 
-        snake_body(Cell sb_starting_cell, float starting_direction)
-        {
-            sb_x = sb_starting_cell.mid_point.coordinates.x();
-            sb_y = sb_starting_cell.mid_point.coordinates.y();
-            sb_speed = 0;
-            sb_direction = starting_direction;
-            sb_drawPosition = { sb_x - snake_half_size, sb_y - snake_half_size };
-            sb_current_cell = sb_starting_cell;
-            isVisible = true;
-        }
-
+        /**
+         * Constructor para añadir nuevos elementos
+         * @param pos la posicion inicial
+         * @param starting_direction la direccion inicial
+         */
         snake_body(Vector2f pos, float starting_direction)
         {
             sb_x = pos[0];
@@ -73,29 +78,41 @@ namespace snake
             isVisible = true;
         }
 
+        /**
+         * Método que pinta en el canvas el objeto
+         * @param canvas el canvas que se está usando
+         */
         void draw_snake_body(Canvas & canvas)
         {
             canvas.set_color(0.26f, 0.6f, 0.97f);
             canvas.fill_rectangle(sb_drawPosition, { snake_size, snake_size });
         }
 
+        /**
+         * Este método mueve el cuerpo de la serpiente según su dirección
+         * @param deltaTime tiempo entre frame y frame
+         * @param followed_position posicion del nodo anterior
+         * @param node_direction direccion del nodo anterior
+         */
         void sb_move(float deltaTime, Vector2f followed_position, int node_direction)
         {
-            //check distance for speed interval
-
+            //En caso de que el cuerpo este este muy cerca de la posicion a seguir
+            //se reduce la velocidad
             if(node_direction == sb_direction &&
-               helper::distance( {sb_x, sb_y}, followed_position) < snake_size - 5)
+               helper::distance( {sb_x, sb_y}, followed_position) < snake_size)
             {
-                sb_speed = 200;
+                sb_speed = 50;
             }
+            //En caso de que el cuerpo este este muy lejos de la posicion a seguir
+            //aumenta la velocidad
             else if(node_direction == sb_direction &&
-                     helper::distance( {sb_x, sb_y}, followed_position) > snake_size)
+                     helper::distance( {sb_x, sb_y}, followed_position) > snake_size + 5)
             {
                 sb_speed = 400;
             }
             else { sb_speed = 350; }
 
-
+            //Mueve la serpiente en función de su dirección
             if(sb_direction == 0)
             {
                 sb_x -= sb_speed * deltaTime;
@@ -115,17 +132,29 @@ namespace snake
 
             sb_drawPosition = { sb_x - snake_half_size, sb_y - snake_half_size };
 
-            if(timerVisible.get_elapsed_seconds() > 0.01)
+            //CORRECCION VISUAL
+            //Se resetea si se va a salir, espera 2 centesimas de segundo
+            //(para que ya no esté salida) y la vuelve a poner visible
+            if(timerVisible.get_elapsed_seconds() > 0.02f)
                 isVisible = true;
             else
                 isVisible = false;
         }
 
+        /**
+         * Este método cambia la dirección
+         * @param _direction direccion deseada
+         */
         void sb_change_direction(int _direction)
         {
             sb_direction = _direction;
         }
 
+        /**
+         * Este método señala si el objeto contiene un punto dado
+         * @return true si el punto esta dentro, false si esta fuera
+         * @param point, punto a comprobar
+         */
         bool contains (const basics::Vector2f & point) const
         {
             return

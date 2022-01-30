@@ -1,6 +1,9 @@
-//
-// Created by migue on 19/01/2022.
-//
+/*
+ * SNAKE
+ * Copyright © 2022+ Miguel Gutiérrez Ruano
+ *
+ * miguelgutierrezruano@gmail.com
+ */
 
 #include "cell.h"
 #include "Food.h"
@@ -31,12 +34,13 @@ namespace snake
         float speed;
         int direction;
 
-        //vector<snake_body> v_snake_body;
-
         Vector2f drawPosition;
 
 
     public:
+        /**
+         * Constructor por defecto
+         */
         Snake()
         {
             x = 300;
@@ -47,6 +51,10 @@ namespace snake
 
         }
 
+        /**
+         * Constructor para crear la serpiente en una direccion concreta
+         * @param startingCell celda inicial
+         */
         Snake(Cell startingCell)
         {
             x = startingCell.mid_point.coordinates.x();
@@ -59,8 +67,11 @@ namespace snake
 
         }
 
-        //void grow() { lenght++; }
-
+        /**
+         * Método que pinta la serpiente en el canvas
+         * Pinta también el vector de snake_bodys
+         * @param canvas el canvas que se está usando
+         */
         void draw_snake(Canvas & canvas)
         {
             canvas.set_color(0.26f, 0.6f, 0.97f);
@@ -79,23 +90,44 @@ namespace snake
 
 
         }
+
+        /**
+         * Método mueve toda la serpiente
+         * Incluyendo el cuerpo
+         * @param deltaTime, tiempo entre frame y frame
+         * @param pivots, vector de todos los pivotes activos
+         */
         void move(float deltaTime, vector<Pivot> & pivots);
 
+        /**
+         * Calcula en que casillas estám la serpiente y su cuerpo
+         * Pone esas casillas ocupadas para que no puedan salir frutas
+         * @param board, array bidimensional de celdas
+         */
         void calculate_current_cell(Cell (&board)[Cell::board_width][Cell::board_height]);
+
+        /**
+         * Calcula la colisión con las frutas, en caso positivo amplía la serpiente
+         * @param food, referencia al objeto food
+         * @param board, array bidimensional de celdas
+         */
         void check_food_collision(Food & food, Cell (&board)[Cell::board_width][Cell::board_height]);
+
+        /**
+         * Método que comprueba la colisión consigo misma y con la pared
+         * @return true si ha colisionado false en caso negativo
+         */
         bool check_endgame_collision();
 
+        /**
+         * Método que cambia la dirección de la serpiente
+         */
         void change_direction(int);
 
         int get_dir() { return direction; }
         float get_x() { return x; }
         float get_y() { return y; }
 
-        void game_over()
-        {
-            sb.clear();
-            direction = -1;
-        }
     };
 }
 

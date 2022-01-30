@@ -16,7 +16,6 @@
 #include <basics/Scene>
 #include <basics/Texture_2D>
 #include <basics/Timer>
-//#include "Sample_Scene.hpp"
 #include "Menu_Scene.h"
 #include <basics/Director>
 
@@ -184,11 +183,7 @@ namespace snake
             {
                 if (!aspect_ratio_adjusted)
                 {
-                    // En este ejemplo la ventana está bloqueada para permanecer horizontal.
-                    // Por tanto, lo normal es que el ancho sea mayor que el alto. El alto de la resolución
-                    // virtual se va a dejar fijo en 720 unidades (tal como se estableció en el constructor)
-                    // y se va a escalar el ancho de la resolución virtual para que el aspect ratio virtual
-                    // coincida con el real de la ventana:
+                    //Se ajusta el canvas al tamaño de la pantalla
 
                     float real_aspect_ratio = float( context->get_surface_width () ) / context->get_surface_height ();
 

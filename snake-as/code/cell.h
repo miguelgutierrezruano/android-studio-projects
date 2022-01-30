@@ -1,6 +1,9 @@
-//
-// Created by migue on 15/01/2022.
-//
+/*
+ * CELL
+ * Copyright © 2022+ Miguel Gutiérrez Ruano
+ *
+ * miguelgutierrezruano@gmail.com
+ */
 
 #pragma once
 
@@ -9,19 +12,21 @@
 
 namespace snake
 {
+    ///enumeracion que determina el estado que puede tener una casilla
     enum CellStatus {
         FREE,
         OCCUPIED,
         BORDER
     };
 
+    ///celdas por las que se moverá la serpiente
     struct Cell {
 
     private:
 
 
     public:
-        static constexpr unsigned board_width = 17;
+        static constexpr unsigned board_width = 16;
         static constexpr unsigned board_height = 14;
         static constexpr float size = 50;
         static constexpr float half_size = size / 2;
@@ -31,11 +36,11 @@ namespace snake
         basics::Vector2f mid_point;
 
         CellStatus status;
-        bool hasPivot;
 
 
 
     public:
+        ///constructor por defecto
         Cell()
         {
 
@@ -43,8 +48,13 @@ namespace snake
             status = FREE;
             mid_point = { position.coordinates.x() + half_size, position.coordinates.y() + half_size };
         }
-        //Cell() { };
 
+        /**
+         * Constructor que indica una posicion y un status
+         * @param _x componente x de la posicion en la que debe estar
+         * @param _y componente y de la posicion en la que debe estar
+         * @param _status estado inicial de la casilla
+         */
         Cell(float _x, float _y, CellStatus _status)
         {
             position = { _x, _y };
@@ -52,6 +62,11 @@ namespace snake
             mid_point = { position.coordinates.x() + half_size, position.coordinates.y() + half_size };
         }
 
+        /**
+         * Este método comprueba si un punto está dentro de la casilla
+         * @param point, punto a comprobar
+         * @return true si el punto esta dentro, false si esta fuera
+         */
         bool contains (const basics::Vector2f & point) const
         {
             return
@@ -68,7 +83,16 @@ namespace snake
         int turn_direction;
         Cell pivot_cell;
 
+        ///Constructor por defecto
         Pivot() { }
+
+        /**
+         * Constructor que crea un pivote con una direccion una posicion
+         * y esta contenido en una casilla
+         * @param pos, posicion del pivote
+         * @param dir, direccion a la que se tendra que cambiar pasado ese pivote
+         * @param _pivotcell, celda que contiene el pivote
+         */
         Pivot(basics::Vector2f pos, int dir, Cell & _pivotcell)
         {
             position = pos;

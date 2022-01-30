@@ -1,11 +1,8 @@
 /*
- * SAMPLE SCENE
- * Copyright © 2018+ Ángel Rodríguez Ballesteros
+ * SAMPLE_SCENE
+ * Copyright © 2022+ Miguel Gutiérrez Ruano
  *
- * Distributed under the Boost Software License, version  1.0
- * See documents/LICENSE.TXT or www.boost.org/LICENSE_1_0.txt
- *
- * angel.rodriguez@esne.edu
+ * miguelgutierrezruano@gmail.com
  */
 
 #include "Sample_Scene.hpp"
@@ -60,6 +57,37 @@ namespace snake
 
     void Sample_Scene::handle (Event & event)
     {
+        //En caso de que esté pausado detectamos cualquier toque para volver al juego
+        if(state == PAUSED && !suspended)
+        {
+            switch (event.id)
+            {
+                case ID(touch-started):
+                {
+                    touch_location =
+                            {
+                                    *event[ID(x)].as< var::Float > (),
+                                    *event[ID(y)].as< var::Float > ()
+                            };
+
+                    break;
+                }
+
+                case ID(touch-moved):
+                {
+                    break;
+                }
+                case ID(touch-ended):
+                {
+                    //if(cells[0][0].contains(touch_location))
+                        state = RUNNING;
+                    break;
+                }
+            }
+        }
+
+        //Si el juego esta ejecutandose se comprueban los toques en los controladores
+        //y en el botón de pausa para cambiar la posicion de la serpiente o pausar el juego
         if (state == RUNNING && !suspended)
         {
             switch (event.id)
@@ -81,16 +109,21 @@ namespace snake
                                 touched_controller = controllers[i].get();
                                 touched_controller->color = { 0.06f, 0.29f, 0.51f };
 
+                                //First touch es controlado porque hay que darle un valor
+                                //inicial a la dirección del body
                                 if(first_touch)
                                 {
+                                    //No puede ir hacia su cuerpo
                                     if(i != 1)
                                     {
+                                        //No reacciona ante cambios imposibles
                                         if(i == 0 && snake.get_dir() == 2) { }
                                         else if (i ==  2 && snake.get_dir() == 0) { }
                                         else if (i == 3 && snake.get_dir() == 1) { }
                                         else if (i == snake.get_dir()) { }
                                         else
                                         {
+                                            //Inserta un pivote solo si en esa casilla no hay uno aún
                                             bool canSpawn = true;
                                             if(!pivot_list.empty())
                                             {
@@ -119,6 +152,7 @@ namespace snake
                                 }
                                 else
                                 {
+                                    //No reacciona ante cambios imposibles
                                     if(i == 0 && snake.get_dir() == 2) { }
                                     else if (i == 1 && snake.get_dir() == 3) { }
                                     else if (i ==  2 && snake.get_dir() == 0) { }
@@ -126,6 +160,7 @@ namespace snake
                                     else if (i == snake.get_dir()) { }
                                     else
                                     {
+                                        //Inserta un pivote solo si en esa casilla no hay uno aún
                                         bool canSpawn = true;
                                         if(!pivot_list.empty())
                                         {
@@ -170,13 +205,17 @@ namespace snake
                 }
                 case ID(touch-ended):
                 {
+                    touch_location =
+                            {
+                                    *event[ID(x)].as< var::Float > (),
+                                    *event[ID(y)].as< var::Float > ()
+                            };
+                    //Si se levanta sobre el botón de pausa se para el juego
+                    if(cells[0][0].contains(touch_location))
+                        state = PAUSED;
+
                     if(touched_controller)
                     {
-                        touch_location =
-                                {
-                                        *event[ID(x)].as< var::Float > (),
-                                        *event[ID(y)].as< var::Float > ()
-                                };
                         touched_controller->color = { 0.26f, 0.6f, 0.97f };
 
                         touched_controller = nullptr;
@@ -193,6 +232,7 @@ namespace snake
         {
             case LOADING: load ();     break;
             case RUNNING: run  (time); break;
+            case PAUSED: break;
         }
 
     }
@@ -216,6 +256,7 @@ namespace snake
                 snake.draw_snake(*canvas);
                 food.draw_food(*canvas);
 
+                //Se pinta en la celda de los pivotes un fragmento de serpiente que representa el giro
                 for (int i = 0; i < pivot_list.size(); ++i) {
                     canvas->set_color(0.26f, 0.6f, 0.97f);
                     canvas->fill_rectangle(pivot_list[i].pivot_cell.position, {Cell::size, Cell::size});
@@ -224,6 +265,29 @@ namespace snake
                 for (int i = 0; i < controllers.size(); ++i) {
                     controllers[i]->render(*canvas);
                 }
+
+                //Se pinta el botón de pausa
+                canvas->set_color(235/255.f, 180/255.f, 52/255.f);
+                canvas->fill_rectangle( { cells[0][0].position[0] + 2, cells[0][0].position[1] + Cell::size / 5 },
+                                        { Cell::size - 4, Cell::size / 5 });
+
+                canvas->fill_rectangle( { cells[0][0].position[0] + 2, cells[0][0].position[1] + (Cell::size / 5) * 3 },
+                                        { Cell::size - 4, Cell::size / 5 });
+            }
+        }
+        else if(!suspended && state == PAUSED)
+        {
+            //Se pinta la textura que hace de menu de pausa
+            if (pause_texture)
+            {
+                Canvas * canvas = context->get_renderer< Canvas > (ID(canvas));
+
+                canvas->fill_rectangle
+                        (
+                                { canvas_width * .5f, canvas_height * .5f },
+                                { pause_texture->get_width (), pause_texture->get_height () },
+                                pause_texture. get ()
+                        );
             }
         }
     }
@@ -256,8 +320,15 @@ namespace snake
                     snake.sb.emplace_back(
                             snake_body(cells[Cell::board_width/2][Cell::board_height/3 - 1])
                             );
-                    //snake.calculate_current_cell(cells);
+
                     food = Food(cells[Cell::board_width/2][(Cell::board_height/3) * 2 + 1]);
+
+                    pause_texture = Texture_2D::create (0, context, "pause.png");
+
+                    // Se comprueba si la textura se ha podido cargar correctamente:
+
+                    context->add (pause_texture);
+
 
 
                     state = RUNNING;
@@ -291,17 +362,17 @@ namespace snake
         for (int i = 0; i < Cell::board_width; ++i)
         {
             //Each row (vertical)
-            //v_cells.push_back(std::vector<Cell>());
             for (int j = 0; j < Cell::board_height; ++j)
             {
                 //Each column (vertical)
-                //Cell new_cell;
                 if((j == 0 || j == Cell::board_height - 1) || (i == 0 || i == Cell::board_width - 1))
                 {
+                    //Creamos los bordes
                     cells[i][j] = Cell(offset_x, offset_y, BORDER);
                 }
                 else
                 {
+                    //El resto de casillas estarán libres
                     cells[i][j] = Cell(offset_x, offset_y, FREE);
                 }
 
@@ -340,12 +411,7 @@ namespace snake
                     else
                         canvas.set_color(0.53f, 0.86f, 0.24f); //134, 220, 61
                 }
-
-                //Each column
                 canvas.fill_rectangle( cells[i][j].position , {cells[i][j].size, cells[i][j].size});
-
-                //canvas.set_color(1, 0,0);
-                //canvas.fill_rectangle( snake.current_cell.position, {cells[i][j].size, cells[i][j].size} );
 
 
 
@@ -358,6 +424,8 @@ namespace snake
 
     void Sample_Scene::calculate_start_point()
     {
+        //Se calcula donde debe empezar y acabar el tablero para que siempre esté
+        //en el medio de la pantalla
         start_point = (canvas_height - (Cell::board_height * Cell::size)) * 0.5f;
         last_point = canvas_height - start_point;
 
@@ -404,6 +472,21 @@ namespace snake
     {
         snake.sb.clear();
         pivot_list.clear();
+
+        for (int i = 0; i < Cell::board_width; ++i)
+        {
+            for (int j = 0; j < Cell::board_height; ++j)
+            {
+                if((j == 0 || j == Cell::board_height - 1) || (i == 0 || i == Cell::board_width - 1))
+                {
+                    cells[i][j].status = BORDER;
+                }
+                else
+                {
+                    cells[i][j].status = FREE;
+                }
+            }
+        }
 
         first_touch = true;
 

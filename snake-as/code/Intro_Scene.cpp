@@ -9,7 +9,6 @@
  */
 
 #include "Intro_Scene.h"
-//#include "Sample_Scene.hpp"
 #include <basics/Canvas>
 #include <basics/Director>
 

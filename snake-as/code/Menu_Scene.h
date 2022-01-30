@@ -43,6 +43,7 @@ namespace snake
         {
             LOADING,
             READY,
+            HELPING,
             FINISHED,
             ERROR
         };
@@ -78,6 +79,8 @@ namespace snake
         Option   options[number_of_options];                ///< Datos de las opciones del menú
 
         std::unique_ptr< Atlas > atlas;                     ///< Atlas que contiene las imágenes de las opciones del menú
+
+        std::shared_ptr < Texture_2D > help_texture;
 
     public:
 
@@ -174,6 +177,34 @@ namespace snake
                             basics::director.run_scene (shared_ptr< Scene >(new Sample_Scene));
                         }
 
+                        if(option_at (touch_location) == HELP)
+                        {
+                            state = HELPING;
+                            //options[0].position = { 0, 0};
+                        }
+
+
+                        break;
+                    }
+                }
+            }
+            else if(state == HELPING)
+            {
+                switch (event.id)
+                {
+                    case ID(touch-started):
+                    {
+
+                        break;
+                    }
+
+                    case ID(touch-moved):
+                    {
+                        break;
+                    }
+                    case ID(touch-ended):
+                    {
+                        state = READY;
                         break;
                     }
                 }
@@ -186,7 +217,8 @@ namespace snake
          */
         void update (float time) override
         {
-            if (!suspended) if (state == LOADING)
+            if (!suspended) {
+                if (state == LOADING)
                 {
                     Graphics_Context::Accessor context = basics::director.lock_graphics_context ();
 
@@ -217,12 +249,23 @@ namespace snake
 
                         // Si el atlas está disponible, se inicializan los datos de las opciones del menú:
 
-                        if (state == READY)
-                        {
-                            configure_options ();
-                        }
+                        help_texture = Texture_2D::create (5, context, "help.png");
+
+                        // Se comprueba si la textura se ha podido cargar correctamente:
+
+                        context->add (help_texture);
+
+                        if(state == READY)
+                            configure_options();
                     }
                 }
+                else if(state == READY)
+                {
+                    //configure_options();
+                }
+                else if(state == HELPING) { }
+            }
+
         }
 
         /**
@@ -273,6 +316,15 @@ namespace snake
 
                         canvas->set_transform (basics::Transformation2f());
                     }
+                    else if(state == HELPING)
+                    {
+                        canvas->fill_rectangle
+                                (
+                                        { canvas_width * .5f, canvas_height * .5f },
+                                        { help_texture->get_width (), help_texture->get_height () },
+                                        help_texture. get ()
+                                );
+                    }
                 }
             }
         }
@@ -300,7 +352,7 @@ namespace snake
             // Se calcula la posición del borde superior del menú en su conjunto de modo que
             // quede centrado verticalmente:
 
-            float option_top = canvas_width / 2.f+ menu_height / 2.f;
+            float option_top = canvas_width / 2.f;// + menu_height / 2.f;
 
             // Se establece la posición del borde superior de cada opción:
 
@@ -308,7 +360,7 @@ namespace snake
             {
                 options[index].position = Point2f{ option_top, canvas_height / 2.f };
 
-                option_top -= options[index].slice->width + 50;
+                option_top -= options[index].slice->width + 30;
             }
 
             // Se restablece la presión de cada opción:

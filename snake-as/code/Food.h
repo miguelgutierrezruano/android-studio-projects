@@ -1,11 +1,9 @@
-//
-// Created by migue on 23/01/2022.
-//
-
-//#ifndef SNAKE_PROTOTYPE_FOOD_H
-//#define SNAKE_PROTOTYPE_FOOD_H
-
-#pragma once
+/*
+ * FOOD
+ * Copyright © 2022+ Miguel Gutiérrez Ruano
+ *
+ * miguelgutierrezruano@gmail.com
+ */
 
 #include "cell.h"
 #include <basics/Vector>
@@ -19,6 +17,9 @@ using namespace std;
 namespace snake
 {
 
+    /**
+         * Clase para representar la comida
+         */
     class Food {
 
     public:
@@ -35,6 +36,10 @@ namespace snake
     public:
         Food() { }
 
+        /**
+         * Constructor que inicializa el objeto en una celda
+         * @param startingCell, celda en la que iniciar
+         */
         Food(Cell startingCell)
         {
             position = { startingCell.mid_point.coordinates.x(), startingCell.mid_point.coordinates.y() };
@@ -43,22 +48,16 @@ namespace snake
         }
 
 
-        int random(int min, int max)
-        {
-            std::random_device rd;
-            std::mt19937 mt(rd());
-            std::uniform_real_distribution<unsigned int> dist(min, max);
-
-            return dist(mt);
-        }
-
-
-
+        /**
+         * Este método mueve la fruta de sitio (genera otra)
+         * @param board, array bidimensional de casillas
+         */
         void generate_food(Cell (&board)[Cell::board_width][Cell::board_height])
         {
             int x = rand() % (Cell::board_width - 2) + 1;
-            int y = rand() % (Cell::board_height - 2) + 1; //random(1, Cell::board_height - 1)
+            int y = rand() % (Cell::board_height - 2) + 1;
 
+            //Solo spawnea la comida en sitios donde no esté la serpiente
             while (board[x][y].status != FREE)
             {
                 if (++x == Cell::board_width)
@@ -76,6 +75,10 @@ namespace snake
             drawPosition = { position[0] - food_half_size, position[1] - food_half_size };
         }
 
+        /**
+         * Este método pinta la comida en el canvas
+         * @param canvas, canvas actual del juego
+         */
         void draw_food(Canvas & canvas)
         {
             //drawPosition = { position[0] - food_half_size, position[1] - food_half_size };
@@ -89,4 +92,3 @@ namespace snake
     };
 }
 
-//#endif //SNAKE_PROTOTYPE_FOOD_H

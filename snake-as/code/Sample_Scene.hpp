@@ -1,16 +1,12 @@
 /*
- * SAMPLE SCENE
- * Copyright © 2018+ Ángel Rodríguez Ballesteros
+ * SAMPLE_SCENE
+ * Copyright © 2022+ Miguel Gutiérrez Ruano
  *
- * Distributed under the Boost Software License, version  1.0
- * See documents/LICENSE.TXT or www.boost.org/LICENSE_1_0.txt
- *
- * angel.rodriguez@esne.edu
+ * miguelgutierrezruano@gmail.com
  */
 
 #include "cell.h"
 #include "snake.h"
-#include "Food.h"
 #include <memory>
 #include <basics/Scene>
 #include <basics/Canvas>
@@ -25,8 +21,7 @@ namespace snake
     {
 
     private:
-        bool     aspect_ratio_adjusted;             ///< false hasta que se ajuste el aspect ratio de la resolución
-        ///< virtual para que concincida con el de la real
+        bool     aspect_ratio_adjusted;
 
         float start_point;
         float last_point;
@@ -35,13 +30,11 @@ namespace snake
 
     public:
 
-        //static constexpr unsigned board_width = 17;
-        //static constexpr unsigned board_height = 14;
-
         enum State
         {
             LOADING,
             RUNNING,
+            PAUSED
         };
 
         State          state;
@@ -50,16 +43,19 @@ namespace snake
         unsigned       canvas_width;
         unsigned       canvas_height;
 
-
-
-        //std::vector<std::vector<Cell>> v_cells;
-
+        /**
+         * Estructura Controller, triángulos que definen las flechas de dirección de
+         * la serpiente
+         */
         struct Controller
         {
             Vector2f points[3];
             Vector3f color;
 
             Controller() { };
+            /**
+            * Contructor determinado por 3 puntos y un color
+            */
             Controller(const Vector2f p1, const Vector2f p2, const Vector2f p3, const Vector3f _color)
             {
                 points[0] = p1;
@@ -74,6 +70,10 @@ namespace snake
                         (p2.coordinates.x() - p3.coordinates.x()) * (p1.coordinates.y() - p3.coordinates.y());
             }
 
+            /**
+            * Método que comprueba si el punto dado está dentro del triágunlo
+            * (en el mismo lado de las tres rectas que lo definen)
+            */
             bool contains (const Vector2f point) const
             {
                 float d1, d2, d3;
@@ -89,6 +89,9 @@ namespace snake
                 return !(has_neg && has_pos);
             }
 
+            /**
+            * Método que pinta los Controllers en el canvas
+            */
             void render (basics::Canvas & canvas)
             {
                 canvas.set_color( color[0], color[1], color[2] );
@@ -99,7 +102,9 @@ namespace snake
 
         };
 
+        ///Tablero de celdas
         Cell cells[Cell::board_width][Cell::board_height];
+        ///Vector de pivotes
         vector<Pivot> pivot_list;
 
         Snake snake;
@@ -111,6 +116,8 @@ namespace snake
         Vector2f touch_location;
         vector< shared_ptr< Controller > > controllers;
         Controller * touched_controller;
+
+        std::shared_ptr < Texture_2D > pause_texture;
 
     public:
 
@@ -125,21 +132,51 @@ namespace snake
         void suspend    () override;
         void resume     () override;
 
+        /**
+        * Se encarga de comprobar cuando se toca la pantalla y controla el juego
+        */
         void handle     (basics::Event & event) override;
+
         void update     (float time) override;
+
+        /**
+        * Pinta la escena en el canvas creado del context
+        */
         void render     (basics::Graphics_Context::Accessor & context) override;
 
     private:
-
+        /**
+        * Carga la escena inicial, ajustando el juego a la pantalla e inicializando
+        * todos los objetos
+        */
         void load ();
+        /**
+        * Update del juego, principalmente la serpiente
+        */
         void run  (float time);
 
-        //REFACTOR TO CLASS
+        /**
+        * Método para crear las celdas
+        */
         void create_cells();
+        /**
+        * Método para dibujar las celdas en el canvas dado
+        */
         void draw_cells(basics::Canvas & canvas);
+        /**
+        * Método para crear los controles en sus posiciones
+        */
         void create_controllers();
+
+        /**
+        * Calcula las posiciones clave para pintar los objetos
+        * correctamente, independientemente del tamaño de la pantalla
+        */
         void calculate_start_point();
 
+        /**
+        * Método para reiniciar la partida
+        */
         void restart_game();
 
     };
